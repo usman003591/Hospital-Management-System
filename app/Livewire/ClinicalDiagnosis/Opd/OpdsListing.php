@@ -1,0 +1,65 @@
+<?php
+
+namespace App\Livewire\ClinicalDiagnosis\Opd;
+
+use Livewire\Component;
+use App\Models\Hospital;
+use Livewire\WithPagination;
+use App\Models\UserPreferences;
+use App\Models\ClinicalDiagnosis;
+
+class OpdsListing extends Component
+{
+    use WithPagination;
+    public $q = '';
+    public $status = '';
+    protected $paginationTheme = 'bootstrap';
+    public function resetFilters()
+    {
+       $this->reset(['q', 'status']);
+       $this->resetPage();
+      // $this->dispatch('refresh'); // Make sure $listeners has 'refresh' => '$refresh'
+      // $this->dispatch('force-page-reload');
+    }
+
+    public function render()
+    {
+        $preferences = UserPreferences::getPreferences();
+        $hospital_id = $preferences['preference']['hospital_id'];
+
+        $data = ClinicalDiagnosis::leftJoin('patients as p', 'p.id', 'clinical_diagnoses.patient_id')
+            ->leftJoin('cd_doctors as cdd', 'cdd.cd_id', 'clinical_diagnoses.id')
+            ->leftJoin('doctors as d', 'cdd.doctor_id', 'd.id')
+            ->leftJoin('hospitals as h', 'h.id', 'clinical_diagnoses.hospital_id')
+            ->leftJoin('o_p_d_counters as counter', 'counter.id', 'clinical_diagnoses.counter_id')
+            ->select([
+                'clinical_diagnoses.*',
+                'counter.name as counter_name',
+                'p.name_of_patient as patient_name',
+                'p.patient_mr_number as patient_mr_number',
+                'cdd.start_date',
+                'cdd.end_date',
+                'd.doctor_name',
+                'h.name as hospital_name',
+            ]
+            )->where('h.id',$hospital_id)
+            ->when($this->q !== '', fn($query) =>
+                $query->where('p.cell', 'iLIKE', "%{$this->q}%")
+                    ->orWhere('p.name_of_patient', 'iLIKE', "%{$this->q}%")
+                    ->orWhere('p.cnic_number', 'iLIKE', "%{$this->q}%")
+                    ->orWhere('p.patient_mr_number', 'iLIKE', "%{$this->q}%")
+                    ->orWhere('clinical_diagnoses.id', 'iLIKE', "%{$this->q}%")
+                    ->orWhere('clinical_diagnoses.count', 'iLIKE', "%{$this->q}%")
+            )
+            ->when($this->status !== '', fn($query) =>
+                $query->where('clinical_diagnoses.status', '=', (string) $this->status))
+            ->orderBy('clinical_diagnoses.created_at', 'desc')
+            ->paginate(10);
+
+        return view('livewire.clinical-diagnosis.opd.opds-listing', [
+            'data' => $data,
+            'page' => 'clinical_diagnosis'
+        ]);
+    }
+
+}

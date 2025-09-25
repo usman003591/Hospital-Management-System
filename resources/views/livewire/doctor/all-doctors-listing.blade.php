@@ -1,0 +1,247 @@
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            @include('include.messages')
+            <style>
+                #normal_reset {
+                    background-color: #e9f3ff;
+                    color: #1b84ff
+                }
+
+                #normal_reset:hover {
+                    background-color: #1b84ff;
+                    color: white;
+                }
+            </style>
+
+            <div class="mb-5 form-group row bg-search">
+                <div class="col-lg-3">
+                    <input type="text" wire:model.live.debounce.500ms="q" id="q" name="user_name"
+                        class="mb-3 ajax_call_trigger form-control form-control-solid mb-lg-0 bg-body-secondary"
+                        placeholder="Search Doctor" value="" maxlength="50">
+                </div>
+
+                <div class="col-lg-2">
+                    <select wire:model.live="status" class="form-select form-select-solid bg-body-secondary">
+                        <option value="">Select All Status</option>
+                        <option value="1">Active</option>
+                        <option value="0">Inactive</option>
+                    </select>
+                </div>
+
+                <div class="col-lg-2">
+                    <select id="department" wire:model.live="department" class="form-select form-select-solid bg-body-secondary"
+                        data-kt-select2="true" data-placeholder="Select Department" data-allow-clear="false">
+                        <option value="">All Departments</option>
+                        @foreach($departments as $department)
+                            <option value="{{ $department->id }}">{{ $department->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+
+                <div class="col-lg-3">
+                    <select wire:model.live="hospital" class="form-select form-select-solid bg-body-secondary"
+                       data-placeholder="Select hospital" data-allow-clear="false">
+                        <option value="">All hospitals</option>
+                        @foreach($hospitals as $hospital)
+                            <option value="{{ $hospital->id }}">{{ $hospital->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+
+                <div class="col-lg-2 mobile-space">
+                    <div class="d-flex justify-content-end">
+                        <button type="button" wire:click="resetFilters" id="normal_reset" class="px-6 btn btn-sm me-2">Reset</button>
+                        {{-- <button type="button" id="normal_search" class="btn btn-sm btn-primary">Search</button> --}}
+                    </div>
+                </div>
+            </div>
+
+            <!--begin::Card-->
+            <div class="card card-flush">
+                <!--begin::Card body-->
+                <div class="pt-0 card-body">
+                    <!--begin::Table container-->
+                    <div class="table-responsive">
+                        <!--begin::Table-->
+                        <div id="kt_project_users_table_wrapper" class="dt-container dt-bootstrap5 dt-empty-footer">
+                            <div id="" class="table-responsive">
+                                <table id="kt_project_users_table"
+                                    class="table align-middle table-row-bordered table-row-dashed gy-4 fw-bold dataTable"
+                                    style="width: 0px;">
+                                    <colgroup>
+                                        <col style="width: auto;">
+                                        <col style="width: auto;">
+                                        <col style="width: auto;">
+                                        <col style="width: auto;">
+                                        <col style="width: auto;">
+                                    </colgroup>
+                                    <thead class="text-gray-500 fs-7 text-uppercase">
+                                        <tr role="row"
+                                            class="text-gray-800 border-gray-200 fw-semibold fs-6 border-bottom">
+                                            <th class="text-gray-800 border-gray-200 fw-semibold fs-6 border-bottom"
+                                                data-dt-column="0" rowspan="1" colspan="1"
+                                                aria-label="Manager: Activate to sort" tabindex="0"
+                                                style="min-width: 17rem"><span
+                                                    class="dt-column-title ms-16">Doctors</span><span
+                                                    class="dt-column-order"></span></th>
+                                            <th class="dt-orderable-asc dt-orderable-desc" data-dt-column="1"
+                                                rowspan="1" colspan="1" aria-label="Date: Activate to sort" tabindex="0"
+                                                style="min-width: 13rem"><span class="dt-column-title"
+                                                    role="button">Created
+                                                    at</span><span class="dt-column-order"></span></th>
+                                            <th class="dt-type-numeric dt-orderable-asc dt-orderable-desc"
+                                                data-dt-column="2" rowspan="1" colspan="1"
+                                                aria-label="Amount: Activate to sort" tabindex="0"
+                                                style="min-width: 10rem"><span class="dt-column-title">
+                                                    <datagrid>Department</datagrid>
+                                                </span><span class="dt-column-order"></span></th>
+                                            <th class="dt-orderable-asc dt-orderable-desc" data-dt-column="3"
+                                                rowspan="1" colspan="1" aria-label="Status: Activate to sort"
+                                                tabindex="0" style="min-width: 7rem"><span class="dt-column-title"
+                                                    role="button">Status</span><span class="dt-column-order"></span>
+                                            </th>
+                                            <th class="dt-orderable-asc dt-orderable-desc" data-dt-column="3"
+                                                rowspan="1" colspan="1" aria-label="Status: Activate to sort"
+                                                tabindex="0" style="min-width: 7rem"><span class="dt-column-title"
+                                                    role="button">Type</span><span class="dt-column-order"></span>
+                                            </th>
+                                            <th class="text-center dt-orderable-none" data-dt-column="4" rowspan="1"
+                                                colspan="1" aria-label="Details" style="min-width: 5rem"><span
+                                                    class="dt-column-title">Actions</span><span
+                                                    class="dt-column-order"></span></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="fs-6">
+                                        @if (count($data) > 0)
+                                        @foreach ($data as $d)
+                                        <tr class="text-gray-800 border-gray-200 fw-semibold fs-6 border-bottom">
+                                            <td>
+                                                <!--begin::User-->
+                                                <div class="d-flex align-items-center">
+                                                    <!--begin::Wrapper-->
+                                                    <div class="me-5 position-relative">
+                                                        <!--begin::Avatar-->
+                                                        <div class="symbol symbol-35px symbol-circle">
+                                                            @if($d->doctor_image)
+                                                            <img src="{{ AvatarImagePath($d->doctor_image) }}"
+                                                                alt="Pic">
+                                                            @endif
+                                                        </div>
+                                                        <!--end::Avatar-->
+                                                    </div>
+                                                    <!--end::Wrapper-->
+                                                    <!--begin::Info-->
+                                                    <div class="d-flex flex-column justify-content-center">
+                                                        <a href=""
+                                                            class="mb-1 text-gray-800 text-hover-primary">@isset($d->doctor_name)
+                                                            {{$d->doctor_name}}
+                                                            @endisset </a>
+                                                        <div class="text-gray-500 fw-semibold fs-6">@isset($d->email)
+                                                            {{$d->email}}
+                                                            @endisset</div>
+                                                    </div>
+                                                    <!--end::Info-->
+                                                </div>
+                                                <!--end::User-->
+                                            </td>
+                                            <td data-order="2024-06-20T00:00:00+05:00">
+                                                {{getBasicDateTimeFormat($d->created_at)}}
+                                            </td>
+                                            <td class="dt-type-numeric">@isset($d->department_name)
+                                                {{$d->department_name}}
+                                                @endisset
+                                            </td>
+                                            <td>
+                                                @if($d->status == 1)
+                                                <span class="mr-2 badge badge-success font-weight-lighter">Active</span>
+                                                @else
+                                                <span
+                                                    class="mr-2 badge badge-danger font-weight-lighter">Inactive</span>
+                                                @endif
+                                            </td>
+                                             <td>
+                                               {!!checkDoctorSpecialistStatus($d->is_specialist)!!}
+                                            </td>
+                                                                                {{--  --}}
+                                            <td>
+                                                <div class="d-flex justify-content-center align-items-center">
+                                                    <!-- Edit Icon -->
+                                                    @if(checkPersonPermission('update_doctors_section_5'))
+                                                    <a title="Edit" href="{{route($page.'.edit',$d->id)}}">
+                                                        <button
+                                                            class="btn btn-icon btn-active-light-primary w-30px h-30px">
+                                                            <i class="ki-duotone ki-pencil fs-3 text-primary">
+                                                                <span class="path1"></span>
+                                                                <span class="path2"></span>
+                                                            </i>
+                                                        </button>
+                                                    </a>
+                                                    @endif
+
+                                                    @if(checkPersonPermission('delete_doctors_section_5'))
+                                                    <!-- Delete Icon -->
+                                                    <a title="Delete"
+                                                        href="{{route($page.'.delete', ['id' => $d->id])}}"
+                                                        data-id="{{$d->id}}"
+                                                        class="btn btn-icon btn-active-light-primary w-30px h-30px delete-{{$page}}">
+                                                        <i class="ki-duotone ki-trash fs-3 text-danger">
+                                                            <span class="path1"></span>
+                                                            <span class="path2"></span>
+                                                            <span class="path3"></span>
+                                                            <span class="path4"></span>
+                                                            <span class="path5"></span>
+                                                        </i>
+                                                    </a>
+                                                    @endif
+                                                </div>
+                                            </td>
+
+                                        </tr>
+
+                                        @endforeach
+                                        @endif
+
+                                    </tbody>
+                                    <tfoot>
+                                    </tfoot>
+                                </table>
+
+                            </div>
+                            <div id="" class="row">
+                                <div id=""
+                                    class="col-sm-12 col-md-5 d-flex align-items-center justify-content-center justify-content-md-start dt-toolbar">
+                                    <div>
+                                        @if($data->total() > 0)
+                                        Showing {{ $data->firstItem() }} to {{ $data->lastItem() }} of {{ $data->total()
+                                        }} records
+                                        @else
+                                        No records found
+                                        @if(request()->has('q') || request()->has('status'))
+                                        for the applied filters
+                                        @endif
+                                        @endif
+                                    </div>
+                                </div>
+                                <div id=""
+                                    class="col-sm-12 col-md-7 d-flex align-items-start justify-content-start justify-content-md-end">
+                                    <div class="dt-paging paging_simple_numbers">
+                                        {{-- {{ $data->links() }} --}}
+                                        {!! $data->links('pagination::bootstrap-4') !!}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!--end::Table-->
+                    </div>
+                    <!--end::Table container-->
+                </div>
+                <!--end::Card body-->
+            </div>
+            <!--end::Card-->
+
+        </div>
+    </div>
+</div>

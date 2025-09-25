@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Receipt</title>
+    <style>
+        /* General styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .page {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 10px;
+            flex-wrap: wrap;
+        }
+
+       .container {
+    width: 49%;
+    padding: 2px;
+    border: 1px solid black;
+    box-sizing: border-box;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.system-note {
+    text-align: center;
+    font-size: 11px;
+    color: #555;
+    margin-top: 3px;
+    padding-top: 3px;
+    /* border-top: 1px dashed #999; */
+    border-top: 1px solid #999;
+}
+
+
+/* Centered Report Title */
+.report-title {
+    text-align: center;
+    width: 100%;
+    margin-top: -15px;
+}
+
+        .reciept-info {
+            width: 100%;
+            overflow: auto;
+            font-size: 14px;
+            padding-bottom: 15px;
+        }
+
+        .invoice-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 5px;
+            padding: 4px;
+            font-size: 10pt;
+        }
+
+        .invoice-table th,
+        .invoice-table td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding: 5px;
+            text-align: center;
+        }
+
+        .invoice-table-details {
+            width: 100%;
+            border-collapse: collapse;
+            /* margin-top: 10px; */
+            font-size: 10pt;
+            padding: 4px;
+        }
+
+        .invoice-table-details th,
+        .invoice-table-details td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding: 5px;
+            text-align: left;
+        }
+
+.footer-section {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+    gap: 20px;
+}
+
+.comments-box {
+    width: 50%;
+    /* border: 1px solid black; */
+    /* padding: 8px; */
+    font-size: 15px;
+    /* min-height: 60px;  */
+
+}
+
+        .totals {
+            width: 45%;
+            text-align: left;
+            margin-top: -45px;
+            font-size: 10pt;
+            margin-left: auto;
+            margin-right: 0;
+        }
+
+        .totals td {
+            margin: 3px;
+        }
+
+        .right-item {
+            width: 45%;
+            text-align: right;
+        }
+
+     .copy-type {
+    margin-top: 5px;
+    font-weight: bold;
+    font-size: 12px;
+}
+        #underline-gap {
+            text-decoration: underline;
+            text-underline-position: under;
+        }
+
+        /* Print specific styles */
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+                font-size: 10pt;
+            }
+
+            .page {
+                display: flex;
+                flex-direction: row;
+                gap: 10px;
+                justify-content: space-between;
+                page-break-inside: avoid;
+            }
+
+            .container {
+                width: 49%;
+                padding: 10px;
+                margin: 0;
+                box-sizing: border-box;
+            }
+
+            table,
+            th,
+            td {
+                font-size: 9pt;
+                page-break-inside: avoid;
+            }
+
+
+            @page {
+                size: A4 landscape;
+                margin: 10mm;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="page" style="width:100%;">
+        <!-- Receipt 1 -->
+        <div class="container" style="float:left; width:46%;">
+            <!-- Header Section -->
+
+            <header class="header">
+                    <table style="width: 100%; table-layout: fixed; border-collapse: collapse;">
+                        <tr>
+                            <!-- Left: Hospital Logo -->
+                            <td style="width: 20%; text-align: left; vertical-align: middle;">
+                                <img src="{{'data:image/png;base64,'.base64_encode(file_get_contents(public_path($hospital->logo)))}}" width="70" height="70" alt="Logo">
+                            </td>
+
+                            <!-- Center: Hospital Name -->
+                            <td class="title-section" style="text-align: center; vertical-align: middle;">
+                                <div style="margin-top: 5px;">
+                                    <h2 style="margin: 0; font-size: 20px;"><strong>{{$hospital->name}}</strong></h2>
+                                    <h4 style="margin: 0; font-size: 14px;"><strong> ({{$hospital->hospital_abbreviation}})</strong></h4>
+
+                                </div>
+                            </td>
+
+                            <td style="width: 20%; text-align: right; vertical-align: middle;">
+                                <div style="display: inline-block; text-align: center; margin-top: 5px;">
+                                    <img src="data:image/png;base64,{{ base64_encode($qrCode) }}" width="70" height="70" alt="QR Code">
+                                    <span style="font-size: 9px; display: inline-block; margin-top: 2px; min-width: 40px;">
+                                               @isset($lab_group_data->lab_group_number)
+                                                {{$lab_group_data->lab_group_number}}
+                                                @endisset
+                                    </span>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </header>
+
+            <hr>
+            <!-- Report Title (stays in center below header row) -->
+            <div class="report-title">
+                <h5><strong>REPORT COLLECTION FORM</strong></h5>
+            </div>
+            <div class="reciept-info">
+                <p style="float: left; margin: 0px;">&nbsp;Receipt #: {{ $lab_invoice_data->invoice_sequence }}</p>
+            </div>
+
+            <!-- Patient Info Table -->
+
+            <table class="invoice-table">
+                <tr>
+                    <td>Name</td>
+                    <td colspan="3">    @isset($patient_data->name_of_patient) {{ $patient_data->name_of_patient}} @endisset</td>
+
+                </tr>
+                <tr>
+                    <td>MR No</td>
+                    <td>@isset($patient_data->patient_mr_number) {{ $patient_data->patient_mr_number}} @endisset </td>
+                    <td>Age</td>
+                   <td>@isset($patient_data->age) {{ $patient_data->age}} @endisset </td>
+                </tr>
+                <tr>
+                    <td>Category</td>
+                    @php $patient_category=ucfirst(str_replace("_"," ",$patient_data->patient_category)); @endphp
+                    <td>{{ $patient_category }}</td>
+                    <td>Cell</td>
+                     <td>@isset($patient_data->cell) {{ $patient_data->cell}} @endisset </td>
+                </tr>
+                {{-- <tr>
+                    <td>Doctor Name</td>
+                    <td colspan="3">Dr. Smith</td>
+                </tr> --}}
+            </table>
+
+            <!-- Services Table -->
+              <table class="invoice-table-details">
+                <tr>
+                    <th width="20%">Sr.</th>
+                    <th width="60%">Service Category</th>
+                    <th width="20%">Amount</th>
+                </tr>
+
+                    @php $count = 0 @endphp
+                    @foreach ($invoice_items as $item)
+                    <tr>
+                        <td>{{ $loop->iteration }}</td>
+                        <td> {{ $item->investigation_name }} </td>
+                        <td class="right">{{ intval(sprintf('%g', $item->price)) }}</td>
+                    </tr>
+                    @endforeach
+
+                    @isset($fill_data_investigations)
+                        @for ($i = 0; $i < $fill_data_investigations; $i++)
+                            <tr>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                        @endfor
+                    @endisset
+            </table>
+            <div class="footer-section">
+            <!-- Left side: Comments -->
+            <div class="comments-box">
+                <strong>&nbsp;Comments:</strong>
+
+            </div>
+
+                <!-- Right side: Totals -->
+                <table class="totals">
+               <tr>
+                    <td>Total Amount:</td>
+                    <td>{{ intval($lab_invoice_data->total_amount) }}</td>
+                </tr>
+                <tr>
+                    <td>Discount:</td>
+                    <td>@isset($lab_invoice_data->discount_amount) {{ intval($lab_invoice_data->discount_amount) }} @endisset</td>
+                </tr>
+                <tr>
+                    <td>Net Amount:</td>
+                    <td>{{ intval($lab_invoice_data->net_amount) }}</td>
+                </tr>
+                {{-- <tr>
+                        <td>Balance:</td>
+                        <td>0</td>
+                </tr> --}}
+                <tr>
+                    <td>Amount Received:</td>
+                    <td>{{ intval($lab_invoice_data->amount_received) }}</td>
+                </tr>
+            </table>
+            </div>
+
+            <div class="reciept-info">
+
+                    <p style="float: left; margin-top: -20px;"><strong>&nbsp;Date:</strong>  {{ getBasicDateTimeFormat($lab_group_data->created_at) }}</p>
+                </div>
+
+            <div class="copy-type">&nbsp;PATIENT COPY</div>
+
+            <div class="system-note">
+                This is a system generated slip, doesn't require any signature & stamp
+            </div>
+        </div>
+
+        <!-- Receipt 2 (Copy) -->
+        <div class="container" style="float:right; width:46%;">
+            <!-- Header Section -->
+            <header class="header">
+            <table style="width: 100%; table-layout: fixed; border-collapse: collapse;">
+                <tr>
+                    <!-- Left: Hospital Logo -->
+                    <td style="width: 20%; text-align: left; vertical-align: middle;">
+                        <img src="{{'data:image/png;base64,'.base64_encode(file_get_contents(public_path($hospital->logo)))}}" width="70" height="70" alt="Logo">
+                    </td>
+
+                    <!-- Center: Hospital Name -->
+                    <td class="title-section" style="text-align: center; vertical-align: middle;">
+                        <div style="margin-top: 5px;">
+                         <h2 style="margin: 0; font-size: 20px;"><strong>{{$hospital->name}}</strong></h2>
+                                    <h4 style="margin: 0; font-size: 14px;"><strong> ({{$hospital->hospital_abbreviation}})</strong></h4>
+                        </div>
+                    </td>
+
+                    <td style="width: 20%; text-align: right; vertical-align: middle;">
+                        <div style="display: inline-block; text-align: center; margin-top: 5px;">
+                            <img src="data:image/png;base64,{{ base64_encode($qrCode) }}" width="70" height="70" alt="QR Code">
+                            <span style="font-size: 9px; display: inline-block; margin-top: 2px; min-width: 40px;">
+                                @isset($lab_group_data->lab_group_number)
+                                {{$lab_group_data->lab_group_number}}
+                                @endisset
+                            </span>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </header>
+
+            <!-- Report Title (stays in center below header row) -->
+            <hr>
+            <div class="report-title">
+                <h5><strong>REPORT COLLECTION FORM</strong></h5>
+            </div>
+            <div class="reciept-info">
+                <p style="float: left; margin: 0;">&nbsp;Receipt #: {{ $lab_invoice_data->invoice_sequence }}</p>
+            </div>
+
+            <!-- Patient Info Table -->
+            <table class="invoice-table">
+               <tr>
+                    <td>Name</td>
+                    <td colspan="3">    @isset($patient_data->name_of_patient) {{ $patient_data->name_of_patient}} @endisset</td>
+                </tr>
+                <tr>
+                    <td>MR No</td>
+                    <td>@isset($patient_data->patient_mr_number) {{ $patient_data->patient_mr_number}} @endisset </td>
+                    <td>Age</td>
+                    <td>@isset($patient_data->age) {{ $patient_data->age}} @endisset </td>
+                </tr>
+                <tr>
+                    <td>Category</td>
+                    @php $patient_category=ucfirst(str_replace("_"," ",$patient_data->patient_category)); @endphp
+                    <td>{{ $patient_category }}</td>
+                    <td>Cell</td>
+                    <td>@isset($patient_data->cell) {{ $patient_data->cell}} @endisset </td>
+                </tr>
+                {{-- <tr>
+                    <td>Doctor Name</td>
+                    <td colspan="3">Dr. Smith</td>
+                </tr> --}}
+            </table>
+
+            <!-- Services Table -->
+            <table class="invoice-table-details">
+                <tr>
+                    <th width="20%">Sr.</th>
+                    <th width="60%">Service Category</th>
+                    <th width="20%">Amount</th>
+                </tr>
+
+                    @php $count = 0 @endphp
+                    @foreach ($invoice_items as $item)
+                    <tr>
+                        <td>{{ $loop->iteration }}</td>
+                        <td> {{ $item->investigation_name }} </td>
+                        <td class="right">{{ intval(sprintf('%g', $item->price)) }}</td>
+                    </tr>
+                    @endforeach
+
+                    @isset($fill_data_investigations)
+                        @for ($i = 0; $i < $fill_data_investigations; $i++)
+                            <tr>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                        @endfor
+                    @endisset
+            </table>
+
+            <div class="footer-section">
+            <!-- Left side: Comments -->
+            <div class="comments-box">
+                <strong>&nbsp;Comments:</strong>
+            </div>
+            <table class="totals">
+               <tr>
+                    <td>Total Amount:</td>
+                    <td>{{ intval($lab_invoice_data->total_amount) }}</td>
+                </tr>
+                <tr>
+                    <td>Discount:</td>
+                    <td>@isset($lab_invoice_data->discount_amount) {{ intval($lab_invoice_data->discount_amount) }} @endisset</td>
+                </tr>
+                <tr>
+                    <td>Net Amount:</td>
+                    <td>{{ intval($lab_invoice_data->net_amount) }}</td>
+                </tr>
+                {{-- <tr>
+                        <td>Balance:</td>
+                        <td>0</td>
+                </tr> --}}
+                <tr>
+                    <td>Amount Received:</td>
+                    <td>{{ intval($lab_invoice_data->amount_received) }}</td>
+                </tr>
+            </table>
+            </div>
+            <div class="reciept-info">
+                    <p style="float: left; margin-top: -20px;"><strong>&nbsp;Date:</strong> {{ getBasicDateTimeFormat($lab_group_data->created_at) }}</p>
+                </div>
+            <div class="copy-type">&nbsp;OFFICE COPY</div>
+
+            <div class="system-note">
+                This is a system generated slip, doesn't require any signature & stamp
+        </div>
+        </div>
+
+    </div>
+</body>
+
+</html>
