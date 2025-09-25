@@ -75,7 +75,7 @@
                         <div id="kt_project_users_table_wrapper" class="dt-container dt-bootstrap5 dt-empty-footer">
                             <div class="table-responsive">
                                 <table id="kt_project_users_table"
-                                    class="table align-middle table-row-bordered table-row-dashed gy-4 fw-bold dataTable"
+                                    class="table align-middle table-row-bordered table-row-dashed gy-4 dataTable"
                                     style="width: 100%;">
                                     <thead class="text-gray-500 fs-7 text-uppercase">
                                         <tr role="row"
@@ -208,7 +208,7 @@
                                         @endforeach
                                         @else
                                         <tr>
-                                            <td colspan="4" class="text-center">No records found</td>
+                                            <td colspan="4" class="text-center"><small class="text-danger">No records found</small></td>
                                         </tr>
                                         @endif
                                     </tbody>
@@ -219,11 +219,9 @@
                                     <div>
                                         @if($data->total() > 0)
                                         Showing {{ $data->firstItem() }} to {{ $data->lastItem() }} of {{ $data->total() }} records
-                                        @else
-                                        No records found
-                                        @if(request()->has('q') || request()->has('status'))
-                                        for the applied filters
-                                        @endif
+                                            @if(request()->has('q') || request()->has('status'))
+                                            for the applied filters
+                                            @endif
                                         @endif
                                     </div>
                                 </div>

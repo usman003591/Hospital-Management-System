@@ -92,30 +92,7 @@ class Patient extends Model
     public static function getAll()
     {
         $request = request();
-
-        $search['q'] = $request->has('q') ? $request->get('q') : false;
-        $search['status'] = $request->has('status') ? $request->get('status') : false;
-
         $data = self::select(['patients.*']);
-
-        if ($search['q']) {
-            $data = $data->where(function ($query) use ($search) {
-                $query->where('patients.name_of_patient', 'iLIKE', "%{$search['q']}%")
-                    ->orWhere('patients.patient_mr_number', 'iLIKE', "%{$search['q']}%")
-                    ->orWhere('patients.cnic_number', 'iLIKE', "%{$search['q']}%")
-                    ->orWhere('patients.cell', 'iLIKE', "%{$search['q']}%");
-                });
-        }
-
-        if ($search['status'] !== false) {
-            if ($search['status'] == 1) {
-                $data = $data->where('patients.status', 1);
-            } elseif ($search['status'] == 0) {
-                $data = $data->where('patients.status', 0);
-            }
-        }
-
-        $rtn['search'] = $search;
         $rtn['data'] = $data->orderby('patients.created_at', 'desc')->paginate(10);
 
         return $rtn;
