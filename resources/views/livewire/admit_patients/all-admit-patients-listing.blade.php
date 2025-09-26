@@ -1,4 +1,16 @@
 <div class="container">
+    <style>
+        #normal_reset {
+            background-color: #e9f3ff;
+            color: #1b84ff;
+        }
+
+        #normal_reset:hover {
+            background-color: #1b84ff;
+            color: white;
+        }
+
+    </style>
     <div class="row">
         <div class="col-md-12">
 
@@ -39,8 +51,9 @@
                     </select>
                 </div>
 
-                <div class="col-lg-2 d-flex justify-content-end">
-                    <button type="button" wire:click="resetFilters" class="btn btn-sm btn-light-primary">Reset</button>
+                <div class="col-lg-2 d-flex justify-content-end align-items-start">
+                    <button type="button" wire:click="resetFilters" id="normal_reset"
+                        class="px-6 btn btn-sm">Reset</button>
                 </div>
             </div>
 
@@ -54,7 +67,8 @@
                                     <th style="min-width: 12rem"><span class="dt-column-title">Room</span></th>
                                     <th style="min-width: 12rem"><span class="dt-column-title">Bed</span></th>
                                     <th style="min-width: 12rem"><span class="dt-column-title">Department</span></th>
-                                    <th style="min-width: 13rem"><span class="dt-column-title">Admission Date</span></th>
+                                    <th style="min-width: 13rem"><span class="dt-column-title">Admission Date</span>
+                                    </th>
                                     <th style="min-width: 8rem"><span class="dt-column-title">Status</span></th>
                                     <th class="text-center min-w-30px"><span class="dt-column-title">Actions</span></th>
                                 </tr>
@@ -115,7 +129,8 @@
                                 @endforeach
                                 @else
                                 <tr>
-                                    <td colspan="7" class="text-center"><small class="text-danger">No records found</small></td>
+                                    <td colspan="7" class="text-center"><small class="text-danger">No records
+                                            found</small></td>
                                 </tr>
                                 @endif
                             </tbody>
