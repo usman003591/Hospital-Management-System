@@ -42,18 +42,12 @@
 @endsection
 
 @section('content')
-{{-- @if (checkIfUserIsAdmin())
-<livewire:patient.all-patients-listing/>
-@else
-<livewire:patient.all-patients-listing/>
-@endif --}}
 <livewire:patient.all-patients-listing/>
 @include('modules.'.$page.'.modals.delete')
 @endsection
 
 
 @section('scripts')
-{{-- <script src="{{getAssetsURLs('js/custom/search_partial.js')}}"></script> --}}
 <script src="{{getAssetsURLs('js/custom/helper_scripts.js')}}"></script>
 <script>
     $(document).ready(function(){

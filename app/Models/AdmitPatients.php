@@ -37,12 +37,6 @@ class AdmitPatients extends Model
     {
         $request = request();
 
-        $search['q'] = $request->has('q') ? $request->get('q') : false;
-        $search['ward'] = $request->has('ward') ? $request->get('ward') : false;
-        $search['department'] = $request->has('department') ? $request->get('department') : false;
-        $search['status'] = $request->has('status') ? $request->get('status') : false;
-
-
         $data = self::leftJoin('wards as w', 'w.id', '=', 'admit_patients.ward_id')
             ->leftJoin('rooms as r', 'r.id', '=', 'admit_patients.room_id')
             ->leftJoin('beds as b', 'b.id', '=', 'admit_patients.bed_id')
@@ -55,31 +49,6 @@ class AdmitPatients extends Model
                 'd.name as department_name'
             ]);
 
-        if ($search['q']) {
-            $data = $data->where(function($query) use ($search) {
-                $query->where('w.ward_name', 'iLIKE', "%{$search['q']}%")
-                    ->orWhere('r.room_number', 'iLIKE', "%{$search['q']}%")
-                    ->orWhere('b.bed_number', 'iLIKE', "%{$search['q']}%");
-            });
-        }
-
-        if ($search['ward']) {
-            $data = $data->where('admit_patients.ward_id', $search['ward']);
-        }
-
-        if ($search['department']) {
-            $data = $data->where('admit_patients.department_id', $search['department']);
-        }
-
-        if ($search['status'] !== false) {
-            if ($search['status'] == 1) {
-                $data = $data->where('admit_patients.status', 1);
-            } elseif ($search['status'] == 0) {
-                $data = $data->where('admit_patients.status', 0);
-            }
-        }
-
-        $rtn['search'] = $search;
         $rtn['data'] = $data->latest()->paginate(10);
 
         return $rtn;
